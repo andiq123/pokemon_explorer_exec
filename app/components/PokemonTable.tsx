@@ -57,54 +57,101 @@ const columns = [
 
 interface PokemonTableProps {
   data: Pokemon[];
+  page: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  loading: boolean;
 }
 
-export function PokemonTable({ data }: PokemonTableProps) {
+export function PokemonTable({
+  data,
+  page,
+  totalPages,
+  onPageChange,
+  loading,
+}: PokemonTableProps) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: totalPages,
   });
 
+  const handlePrevious = () => {
+    if (page > 0) {
+      onPageChange(page - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (page < totalPages - 1) {
+      onPageChange(page + 1);
+    }
+  };
+
   return (
-    <div className="overflow-x-auto rounded-lg shadow-lg bg-white">
-      <table className="min-w-full">
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="bg-gradient-to-r from-blue-50 to-indigo-50">
-              {headerGroup.headers.map((header) => {
-                const isSpriteColumn = header.column.id === "sprites";
-                return (
-                  <th
-                    key={header.id}
-                    className={`px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider ${
-                      isSpriteColumn ? "text-center" : "text-left"
-                    }`}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-100">
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="hover:bg-blue-50 transition-colors duration-150 cursor-pointer">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <div className="overflow-x-auto rounded-lg shadow-lg bg-white">
+        <table className="min-w-full">
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                {headerGroup.headers.map((header) => {
+                  const isSpriteColumn = header.column.id === "sprites";
+                  return (
+                    <th
+                      key={header.id}
+                      className={`px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider ${
+                        isSpriteColumn ? "text-center" : "text-left"
+                      }`}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  );
+                })}
+              </tr>
+            ))}
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-100">
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="hover:bg-blue-50 transition-colors duration-150 cursor-pointer">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-sm text-gray-700">
+          Page {page + 1} of {totalPages}
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handlePrevious}
+            disabled={page === 0 || loading}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={page >= totalPages - 1 || loading}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

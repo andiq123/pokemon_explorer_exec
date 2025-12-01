@@ -7,16 +7,23 @@ import {
 import type { Pokemon } from "../lib/types/pokemon";
 import { PokemonTable } from "./PokemonTable";
 
+const PAGE_SIZE = 20;
+
 export function PokemonList() {
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     async function loadPokemon() {
       try {
         setLoading(true);
-        const listResponse = await fetchPokemonList(20, 0);
+        const offset = page * PAGE_SIZE;
+        const listResponse = await fetchPokemonList(PAGE_SIZE, offset);
+        
+        setTotalCount(listResponse.count);
         
         const pokemonIds = listResponse.results
           .map((item) => extractPokemonIdFromUrl(item.url))
@@ -35,7 +42,7 @@ export function PokemonList() {
     }
 
     loadPokemon();
-  }, []);
+  }, [page]);
 
   if (loading) {
     return (
@@ -58,6 +65,8 @@ export function PokemonList() {
     );
   }
 
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
@@ -65,7 +74,13 @@ export function PokemonList() {
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Pokémon Explorer</h1>
           <p className="text-gray-600">Discover and explore Pokémon data</p>
         </div>
-        <PokemonTable data={pokemon} />
+        <PokemonTable
+          data={pokemon}
+          page={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          loading={loading}
+        />
       </div>
     </div>
   );
