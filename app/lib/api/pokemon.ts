@@ -1,5 +1,5 @@
 import { pokeApiClient } from "./client";
-import type { Pokemon, PokemonListResponse } from "../types/pokemon";
+import type { Pokemon, PokemonListResponse, PokemonType } from "../types/pokemon";
 
 export async function fetchPokemonList(limit = 20, offset = 0) {
   const response = await pokeApiClient.get<PokemonListResponse>("/pokemon", {
@@ -18,10 +18,10 @@ export function extractPokemonIdFromUrl(url: string): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
-export async function fetchPokemonTypes() {
+export async function fetchPokemonTypes(): Promise<PokemonType[]> {
   const response = await pokeApiClient.get<{
     count: number;
-    results: Array<{ name: string; url: string }>;
+    results: PokemonType[];
   }>("/type");
   return response.data.results.filter((type) => type.name !== "unknown" && type.name !== "shadow");
 }

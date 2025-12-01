@@ -1,5 +1,5 @@
 import type { Route } from "./+types/home";
-import { PokemonList } from "../components/PokemonList";
+import { PokemonList } from "../components/pokemon/PokemonList";
 
 export function meta({}: Route.MetaArgs) {
   return [

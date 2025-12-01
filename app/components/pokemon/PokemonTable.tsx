@@ -4,7 +4,7 @@ import {
   createColumnHelper,
   flexRender,
 } from "@tanstack/react-table";
-import type { Pokemon } from "../lib/types/pokemon";
+import type { Pokemon } from "../../lib/types/pokemon";
 
 const columnHelper = createColumnHelper<Pokemon>();
 

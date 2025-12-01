@@ -1,7 +1,9 @@
+import type { PokemonType } from "../../lib/types/pokemon";
+
 interface TypeFilterProps {
   value: string;
   onChange: (value: string) => void;
-  types: Array<{ name: string; url: string }>;
+  types: PokemonType[];
 }
 
 export function TypeFilter({ value, onChange, types }: TypeFilterProps) {
