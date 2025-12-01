@@ -7,9 +7,9 @@
 
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  @apply bg-gradient-to-br from-gray-50 to-white min-h-screen;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
-  }
+body {
+  @apply text-gray-900;
 }
