@@ -1,11 +1,17 @@
 import { useState, useEffect } from "react";
 import {
   fetchPokemonList,
-  fetchPokemon,
   extractPokemonIdFromUrl,
+  fetchPokemon,
+  fetchPokemonTypes,
+  fetchPokemonByType,
 } from "../lib/api/pokemon";
 import type { Pokemon } from "../lib/types/pokemon";
 import { PokemonTable } from "./PokemonTable";
+import { PokemonHeader } from "./PokemonHeader";
+import { PokemonFilters } from "./PokemonFilters";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { ErrorMessage } from "./ErrorMessage";
 
 const PAGE_SIZE = 20;
 
@@ -15,11 +21,43 @@ export function PokemonList() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [selectedType, setSelectedType] = useState("");
+  const [types, setTypes] = useState<Array<{ name: string; url: string }>>([]);
+
+  useEffect(() => {
+    async function loadTypes() {
+      try {
+        const typesData = await fetchPokemonTypes();
+        setTypes(typesData);
+      } catch (err) {
+        console.error("Failed to load types:", err);
+      }
+    }
+    loadTypes();
+  }, []);
 
   useEffect(() => {
     async function loadPokemon() {
       try {
         setLoading(true);
+        setError(null);
+
+        if (selectedType) {
+          const typePokemon = await fetchPokemonByType(selectedType);
+          const pokemonIds = typePokemon
+            .map((item) => extractPokemonIdFromUrl(item.url))
+            .filter((id): id is number => id !== null)
+            .slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+          const pokemonData = await Promise.all(
+            pokemonIds.map((id) => fetchPokemon(id))
+          );
+
+          setPokemon(pokemonData);
+          setTotalCount(typePokemon.length);
+          return;
+        }
+
         const offset = page * PAGE_SIZE;
         const listResponse = await fetchPokemonList(PAGE_SIZE, offset);
         
@@ -42,38 +80,32 @@ export function PokemonList() {
     }
 
     loadPokemon();
-  }, [page]);
+  }, [page, selectedType]);
+
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value);
+    setPage(0);
+  };
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600 mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading Pokémon...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-          <p className="text-red-800 font-medium">Error: {error}</p>
-        </div>
-      </div>
-    );
+    return <ErrorMessage message={error} />;
   }
-
-  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Pokémon Explorer</h1>
-          <p className="text-gray-600">Discover and explore Pokémon data</p>
-        </div>
+        <PokemonHeader />
+        <PokemonFilters
+          selectedType={selectedType}
+          types={types}
+          onTypeChange={handleTypeChange}
+        />
         <PokemonTable
           data={pokemon}
           page={page}

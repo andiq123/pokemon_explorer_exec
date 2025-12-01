@@ -18,3 +18,18 @@ export function extractPokemonIdFromUrl(url: string): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
+export async function fetchPokemonTypes() {
+  const response = await pokeApiClient.get<{
+    count: number;
+    results: Array<{ name: string; url: string }>;
+  }>("/type");
+  return response.data.results.filter((type) => type.name !== "unknown" && type.name !== "shadow");
+}
+
+export async function fetchPokemonByType(type: string) {
+  const response = await pokeApiClient.get<{
+    pokemon: Array<{ pokemon: { name: string; url: string } }>;
+  }>(`/type/${type}`);
+  return response.data.pokemon.map((p) => p.pokemon);
+}
+
