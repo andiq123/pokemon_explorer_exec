@@ -4,6 +4,7 @@ import {
   createColumnHelper,
   flexRender,
 } from "@tanstack/react-table";
+import { useNavigate } from "react-router";
 import type { Pokemon } from "../../lib/types/pokemon";
 
 const columnHelper = createColumnHelper<Pokemon>();
@@ -70,6 +71,7 @@ export function PokemonTable({
   onPageChange,
   loading,
 }: PokemonTableProps) {
+  const navigate = useNavigate();
   const table = useReactTable({
     data,
     columns,
@@ -96,7 +98,10 @@ export function PokemonTable({
         <table className="min-w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="bg-gradient-to-r from-blue-50 to-indigo-50">
+              <tr
+                key={headerGroup.id}
+                className="bg-gradient-to-r from-blue-50 to-indigo-50"
+              >
                 {headerGroup.headers.map((header) => {
                   const isSpriteColumn = header.column.id === "sprites";
                   return (
@@ -110,7 +115,7 @@ export function PokemonTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </th>
                   );
@@ -120,9 +125,16 @@ export function PokemonTable({
           </thead>
           <tbody className="bg-white divide-y divide-gray-100">
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="hover:bg-blue-50 transition-colors duration-150 cursor-pointer">
+              <tr
+                key={row.id}
+                onClick={() => navigate(`/pokemon/${row.original.id}`)}
+                className="hover:bg-blue-50 transition-colors duration-150 cursor-pointer"
+              >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                  <td
+                    key={cell.id}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -155,4 +167,3 @@ export function PokemonTable({
     </div>
   );
 }
-

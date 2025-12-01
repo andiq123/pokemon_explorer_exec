@@ -20,7 +20,9 @@ interface PokemonDataContextType {
   setPage: (page: number) => void;
 }
 
-const PokemonDataContext = createContext<PokemonDataContextType | undefined>(undefined);
+const PokemonDataContext = createContext<PokemonDataContextType | undefined>(
+  undefined,
+);
 
 export function PokemonDataProvider({ children }: { children: ReactNode }) {
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
@@ -81,7 +83,7 @@ export function PokemonDataProvider({ children }: { children: ReactNode }) {
           .slice(start, end);
 
         const pokemonData = await Promise.all(
-          pokemonIds.map((id) => fetchPokemon(id))
+          pokemonIds.map((id) => fetchPokemon(id)),
         );
 
         setPokemon(pokemonData);
@@ -98,13 +100,15 @@ export function PokemonDataProvider({ children }: { children: ReactNode }) {
 
   const filteredPokemon = useMemo(() => {
     if (searchQuery.trim() && searchedPokemon) {
-      const matchesType = !selectedType || searchedPokemon.types.some((t) => t.type.name === selectedType);
+      const matchesType =
+        !selectedType ||
+        searchedPokemon.types.some((t) => t.type.name === selectedType);
       return matchesType ? [searchedPokemon] : [];
     }
 
     if (selectedType) {
       return pokemon.filter((p) =>
-        p.types.some((t) => t.type.name === selectedType)
+        p.types.some((t) => t.type.name === selectedType),
       );
     }
 
@@ -140,4 +144,3 @@ export function usePokemonData() {
   }
   return context;
 }
-

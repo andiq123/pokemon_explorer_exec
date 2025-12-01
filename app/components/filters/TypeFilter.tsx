@@ -24,4 +24,3 @@ export function TypeFilter({ value, onChange, types }: TypeFilterProps) {
     </div>
   );
 }
-
